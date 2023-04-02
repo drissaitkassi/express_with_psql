@@ -19,12 +19,14 @@ app.get('/', (req, res) => {
   res.json({message:'Hello World!'})
 })
 
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
 app.get('/users',database.getUsers)
 app.get('/user/:id',database.getUsersById)
+app.get('/users/:name',database.getUsersByName)
 app.post('/user',database.createUser)
 app.put('/users/:id',database.updateUser)
 app.delete('/users/:id',database.deleteUser)

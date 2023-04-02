@@ -61,10 +61,24 @@ const deleteUser=(req,res)=>{
     })
 }
 
+const getUsersByName=(req,res)=>{
+  
+
+    const keyword=req.params.name
+    console.log(req.params)
+    pool.query("select * from users where name like $1 ",[`%${keyword}%`],(err,results)=>{
+        if(err){
+            throw err
+        }
+        res.status(200).send(results.rows)
+    })
+}
+
   module.exports = {
     getUsers,
     getUsersById,
     createUser,  
     updateUser,
     deleteUser,
+    getUsersByName
   }
