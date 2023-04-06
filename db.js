@@ -32,6 +32,56 @@ const getUsersById=(req,res)=>{
     })
 }
 
+const login=(req,res)=>{
+    const {email,password}=req.body
+    //get users email and pass word if exists 
+    pool.query('select * from users where email=$1',[email],(err,results)=>
+    {
+        // check error for query 
+        if(err){
+            throw err
+        }
+        console.log('user found ')
+        // res.status(200).json(results.rows)
+        console.log(results.rows.length)
+        //check if row count > 0 for a particular user 
+        if(results.rows.length!=0){
+
+           
+        // when user is found we retrieve the hashed password from db 
+
+           let hashedPasswordFromDb=results.rows[0]['password']
+           console.log(hashedPasswordFromDb)
+          
+
+            //compare passwords with crypt compare method
+            bcrypt.compare(password,hashedPasswordFromDb,(err,isMatch)=>{
+
+                // check for comparison error 
+                if(err){
+                    throw err
+                }
+
+                // when comparison is sucessful  then we check if the passwords are a match 
+                if(isMatch){
+                    console.log('auth sucess')
+                    res.status(201).json({"message":"login sucess"})
+                }else{
+                   
+                    
+                      console.log('invalid credientials')
+                   res.status(409).json({"message":"invalid credientials"})
+                    
+
+                }
+
+            })
+        }
+    })
+    
+
+
+}
 const createUser=(req,res)=>{
     const {email,password}=req.body
     // verify if user exist 
@@ -41,7 +91,7 @@ const createUser=(req,res)=>{
         }
         res.status(200).json(results.rows)
         if(results.rows.length==0){
-                // query db if returns 0 rows then insert else don't insert 
+            // query db if returns 0 rows then insert else don't insert 
             bcrypt.hash(password,10,(err,hash)=>{
                 if(err){
                     throw err
@@ -60,10 +110,7 @@ const createUser=(req,res)=>{
             console.log('user exist')
             res.status(409).send('user already exist')
         }
-
-    })
-    
-
+    })  
  }
 const updateUser=(req,res)=>{
     const id =req.params.id
@@ -106,5 +153,6 @@ const getUsersByName=(req,res)=>{
     createUser,  
     updateUser,
     deleteUser,
-    getUsersByName
+    getUsersByName,
+    login
   }

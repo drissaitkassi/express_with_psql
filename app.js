@@ -30,7 +30,7 @@ app.get('/users/:email',database.getUsersByName)
 app.post('/user',database.createUser)
 app.put('/users/:id',database.updateUser)
 app.delete('/users/:id',database.deleteUser)
-app.post('/login')
+app.post('/login',database.login)
 app.post('/register')
 app.post('/logout')
 
