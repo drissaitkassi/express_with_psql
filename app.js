@@ -26,7 +26,7 @@ app.listen(port, () => {
 
 app.get('/users',database.getUsers)
 app.get('/user/:id',database.getUsersById)
-app.get('/users/:name',database.getUsersByName)
+app.get('/users/:email',database.getUsersByName)
 app.post('/user',database.createUser)
 app.put('/users/:id',database.updateUser)
 app.delete('/users/:id',database.deleteUser)

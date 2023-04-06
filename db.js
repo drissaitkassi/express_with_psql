@@ -29,8 +29,8 @@ const getUsersById=(req,res)=>{
 }
 
 const createUser=(req,res)=>{
-    const {user_id,name,age}=req.body
-    pool.query('INSERT INTO users(user_id,name,age)  VALUES ($1,$2,$3) RETURNING *',[user_id,name,age],(err,results)=>
+    const {email,password}=req.body
+    pool.query('INSERT INTO users(email,password)  VALUES ($1,$2,$3) RETURNING *',[email,password],(err,results)=>
     {
         if (err){
             throw err
@@ -64,12 +64,13 @@ const deleteUser=(req,res)=>{
 const getUsersByName=(req,res)=>{
   
 
-    const keyword=req.params.name
+    const keyword=req.params.email
     console.log(req.params)
-    pool.query("select * from users where name like $1 ",[`%${keyword}%`],(err,results)=>{
+    pool.query("select * from users where email like $1 ",[`%${keyword}%`],(err,results)=>{
         if(err){
             throw err
         }
+        console.log(results.rows)
         res.status(200).send(results.rows)
     })
 }
