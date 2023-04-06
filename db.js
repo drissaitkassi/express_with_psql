@@ -1,4 +1,5 @@
 const Pool = require('pg').Pool
+const bcrypt=require('bcrypt')
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
@@ -6,6 +7,9 @@ const pool = new Pool({
   password: 'root',
   port: 5432,
 })
+
+
+
 
 
 const getUsers = (request, response) => {
@@ -30,16 +34,37 @@ const getUsersById=(req,res)=>{
 
 const createUser=(req,res)=>{
     const {email,password}=req.body
-    pool.query('INSERT INTO users(email,password)  VALUES ($1,$2) RETURNING *',[email,password],(err,results)=>
-    {
-        if (err){
+    // verify if user exist 
+    pool.query('SELECT * FROM users where email=$1',[email],(err,results)=>{
+        if(err){
             throw err
         }
-        res.status(201).send(`user added with user_id=${results.rows[0].user_id}`)
-    }
-)}
+        res.status(200).json(results.rows)
+        if(results.rows.length==0){
+                // query db if returns 0 rows then insert else don't insert 
+            bcrypt.hash(password,10,(err,hash)=>{
+                if(err){
+                    throw err
+                }
+                pool.query('INSERT INTO users(email,password)  VALUES ($1,$2) RETURNING *',[email,hash],(err,results)=>
+                {
+                    if (err){
+                        throw err
+                    }
+                    res.status(201).send(`user added with user_id=${results.rows[0].user_id}`)
+                }
+            )
+            })
+            
+        }else{
+            console.log('user exist')
+            res.status(409).send('user already exist')
+        }
 
+    })
+    
 
+ }
 const updateUser=(req,res)=>{
     const id =req.params.id
     const {user_id,name,age}=req.body
