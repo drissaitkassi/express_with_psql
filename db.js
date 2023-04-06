@@ -30,7 +30,7 @@ const getUsersById=(req,res)=>{
 
 const createUser=(req,res)=>{
     const {email,password}=req.body
-    pool.query('INSERT INTO users(email,password)  VALUES ($1,$2,$3) RETURNING *',[email,password],(err,results)=>
+    pool.query('INSERT INTO users(email,password)  VALUES ($1,$2) RETURNING *',[email,password],(err,results)=>
     {
         if (err){
             throw err
