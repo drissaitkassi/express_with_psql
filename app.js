@@ -2,11 +2,13 @@ const express = require('express')
 const database=require('./db')
 const bodyParser = require('body-parser')
 const app = express()
+const jwt=require('jsonwebtoken')
+const cookieParser= require('cookie-parser')
 const port = 3000
 var cors = require('cors')
 
 app.use(cors())
-
+app.use(cookieParser())
 app.use(bodyParser.json())
 
 app.use(
@@ -30,7 +32,7 @@ app.get('/users/:email',database.getUsersByName)
 app.post('/user',database.createUser)
 app.put('/users/:id',database.updateUser)
 app.delete('/users/:id',database.deleteUser)
-app.post('/login',database.login)
+app.post('/login',database.authenticatToken,database.login)
 app.post('/register')
 app.post('/logout')
 

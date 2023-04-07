@@ -1,5 +1,8 @@
+require('dotenv').config()
 const Pool = require('pg').Pool
 const bcrypt=require('bcrypt')
+const jwt=require('jsonwebtoken')
+const cookieParser= require('cookie-parser')
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
@@ -41,8 +44,6 @@ const login=(req,res)=>{
         if(err){
             throw err
         }
-        console.log('user found ')
-        // res.status(200).json(results.rows)
         console.log(results.rows.length)
         //check if row count > 0 for a particular user 
         if(results.rows.length!=0){
@@ -65,7 +66,18 @@ const login=(req,res)=>{
                 // when comparison is sucessful  then we check if the passwords are a match 
                 if(isMatch){
                     console.log('auth sucess')
-                    res.status(201).json({"message":"login sucess"})
+                    //use JWT 
+                    const user ={ email :email}
+                    const accessToken=  jwt.sign(user ,process.env.ACCESS_TOKEN_SECRET)
+                    // const serialized =("token",accessToken,{
+                    //     httpOnly:true
+                    // })
+                    res.cookie("token",accessToken,{
+                        httpOnly:true
+                    })
+                    //res.setHeader('Set-Cookie', serialized);
+                    res.json({"accessToken":accessToken})
+
                 }else{
                    
                     
@@ -82,6 +94,25 @@ const login=(req,res)=>{
 
 
 }
+//jwt middleware 
+
+function authenticatToken(req,res,next){
+    const token=req.cookies.token
+    console.log(token)
+    //console.log('these are headers')
+  
+    if(token == null) res.sendStatus(401)
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>
+    {
+        if(err) 
+        console.log('error verifying token')
+        //return res.sendStatus(403)
+        req.user=user
+        next()
+  
+    })
+  }
+
 const createUser=(req,res)=>{
     const {email,password}=req.body
     // verify if user exist 
@@ -107,7 +138,6 @@ const createUser=(req,res)=>{
             })
             
         }else{
-            console.log('user exist')
             res.status(409).send('user already exist')
         }
     })  
@@ -137,12 +167,10 @@ const getUsersByName=(req,res)=>{
   
 
     const keyword=req.params.email
-    console.log(req.params)
     pool.query("select * from users where email like $1 ",[`%${keyword}%`],(err,results)=>{
         if(err){
             throw err
         }
-        console.log(results.rows)
         res.status(200).send(results.rows)
     })
 }
@@ -154,5 +182,6 @@ const getUsersByName=(req,res)=>{
     updateUser,
     deleteUser,
     getUsersByName,
-    login
+    login,
+    authenticatToken
   }
