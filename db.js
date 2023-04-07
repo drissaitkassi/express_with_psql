@@ -146,16 +146,16 @@ const createUser=(req,res)=>{
 
 
 
-const updateUser=(req,res)=>{
-    const id =req.params.id
-    const {user_id,name,age}=req.body
-    pool.query('UPDATE users SET user_id=$1,name=$2,age=$3 where user_id=$1',[id,name,age],(err,results)=>{
-        if(err){
-            throw err
-        }
-        res.status(200).send(`user with id : ${id} is modified `)
-    })
-}
+// const updateUser=(req,res)=>{
+//     const id =req.params.id
+//     const {user_id,name,age}=req.body
+//     pool.query('UPDATE users SET user_id=$1,name=$2,age=$3 where user_id=$1',[id,name,age],(err,results)=>{
+//         if(err){
+//             throw err
+//         }
+//         res.status(200).send(`user with id : ${id} is modified `)
+//     })
+// }
 
 const updateProducts=(req,res)=>{
     const id =req.params.id
@@ -178,25 +178,23 @@ const deleteProduct=(req,res)=>{
     })
 }
 
-const getUsersByName=(req,res)=>{
+// const getUsersByName=(req,res)=>{
   
 
-    const keyword=req.params.email
-    pool.query("select * from users where email like $1 ",[`%${keyword}%`],(err,results)=>{
-        if(err){
-            throw err
-        }
-        res.status(200).send(results.rows)
-    })
-}
+//     const keyword=req.params.email
+//     pool.query("select * from users where email like $1 ",[`%${keyword}%`],(err,results)=>{
+//         if(err){
+//             throw err
+//         }
+//         res.status(200).send(results.rows)
+//     })
+// }
 
   module.exports = {
     getProducts,
     createUser,  
-    updateUser,
     updateProducts,
     deleteProduct,
-    getUsersByName,
     getProductsByName,
     login,
     authenticatToken,

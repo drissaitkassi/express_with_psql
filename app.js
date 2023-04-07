@@ -28,13 +28,12 @@ app.listen(port, () => {
 
 app.get('/products',database.getProducts)
 app.delete('/products/:id',database.deleteProduct)
-app.get('/users/:email',database.getUsersByName)
 app.get('/products/:name',database.getProductsByName)
 app.post('/user',database.createUser)
 app.post('/products',database.createProducts)
-app.put('/users/:id',database.updateUser)
 app.put('/products/:id',database.updateProducts)
-app.post('/login',database.authenticatToken,database.login)
+app.post('/login',database.login)
+
 // app.post('/register')
 // app.post('/logout')
 
