@@ -12,28 +12,23 @@ const pool = new Pool({
 })
 
 
-
-
-
-const getUsers = (request, response) => {
-    pool.query('SELECT * FROM users ', (error, results) => {
+const getProducts = (request, response) => {
+    pool.query('SELECT * FROM products ', (error, results) => {
       if (error) {
         throw error
       }
       response.status(200).json(results.rows)
     })
   }
-
-
-const getUsersById=(req,res)=>{
-    const id =req.params.id
-    pool.query('SELECT * FROM users where user_id=$1',[id],(err,results)=>{
+const getProductsByName = (req, res) => {
+    const keyword=req.params.name
+    pool.query("select * from products where name like $1 ",[`%${keyword}%`],(err,results)=>{
         if(err){
             throw err
         }
-        res.status(200).json(results.rows)
+        res.status(200).send(results.rows)
     })
-}
+  }
 
 const login=(req,res)=>{
     const {email,password}=req.body
@@ -69,18 +64,13 @@ const login=(req,res)=>{
                     //use JWT 
                     const user ={ email :email}
                     const accessToken=  jwt.sign(user ,process.env.ACCESS_TOKEN_SECRET)
-                    // const serialized =("token",accessToken,{
-                    //     httpOnly:true
-                    // })
+                
                     res.cookie("token",accessToken,{
                         httpOnly:true
                     })
-                    //res.setHeader('Set-Cookie', serialized);
                     res.json({"accessToken":accessToken})
 
                 }else{
-                   
-                    
                       console.log('invalid credientials')
                    res.status(409).json({"message":"invalid credientials"})
                     
@@ -99,19 +89,30 @@ const login=(req,res)=>{
 function authenticatToken(req,res,next){
     const token=req.cookies.token
     console.log(token)
-    //console.log('these are headers')
   
     if(token == null) res.sendStatus(401)
     jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>
     {
         if(err) 
         console.log('error verifying token')
-        //return res.sendStatus(403)
         req.user=user
         next()
   
     })
   }
+
+
+const createProducts=(req,res)=>{
+    const {name,price,description,instock}=req.body
+    pool.query('INSERT INTO products(name,price,description,instock) VALUES ($1,$2,$3,$4) RETURNING * ',[name,price,description,instock],(err,results)=>{
+        if(err){
+            throw err
+        }
+        res.status(201).send(`product added with user_id=${results.rows[0].product_id}`)
+
+    })
+}
+
 
 const createUser=(req,res)=>{
     const {email,password}=req.body
@@ -142,6 +143,9 @@ const createUser=(req,res)=>{
         }
     })  
  }
+
+
+
 const updateUser=(req,res)=>{
     const id =req.params.id
     const {user_id,name,age}=req.body
@@ -153,13 +157,24 @@ const updateUser=(req,res)=>{
     })
 }
 
-const deleteUser=(req,res)=>{
-    const id=req.params.id
-    pool.query('DELETE FROM users WHERE user_id=$1',[id],(err,results)=>{
+const updateProducts=(req,res)=>{
+    const id =req.params.id
+    const {name,price,description,instock}=req.body
+    pool.query('UPDATE products SET name=$2,price=$3,description=$4,instock=$5 where product_id=$1',[id,name,price,description,instock],(err,results)=>{
         if(err){
             throw err
         }
-        res.status(200).send(`user with id : ${id} is deleted `)
+        res.status(200).send(`product with id : ${id} is modified `)
+    })
+}
+
+const deleteProduct=(req,res)=>{
+    const id=req.params.id
+    pool.query('DELETE FROM products WHERE product_id=$1',[id],(err,results)=>{
+        if(err){
+            throw err
+        }
+        res.status(200).send(`product with id : ${id} is deleted `)
     })
 }
 
@@ -176,12 +191,14 @@ const getUsersByName=(req,res)=>{
 }
 
   module.exports = {
-    getUsers,
-    getUsersById,
+    getProducts,
     createUser,  
     updateUser,
-    deleteUser,
+    updateProducts,
+    deleteProduct,
     getUsersByName,
+    getProductsByName,
     login,
-    authenticatToken
+    authenticatToken,
+    createProducts
   }
