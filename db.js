@@ -39,7 +39,7 @@ const login=(req,res)=>{
         if(err){
             throw err
         }
-        console.log(results.rows.length)
+        // console.log(results.rows.length)
         //check if row count > 0 for a particular user 
         if(results.rows.length!=0){
 
@@ -47,7 +47,7 @@ const login=(req,res)=>{
         // when user is found we retrieve the hashed password from db 
 
            let hashedPasswordFromDb=results.rows[0]['password']
-           console.log(hashedPasswordFromDb)
+           //console.log(hashedPasswordFromDb)
           
 
             //compare passwords with crypt compare method
@@ -64,7 +64,6 @@ const login=(req,res)=>{
                     //use JWT 
                     const user ={ email :email}
                     const accessToken=  jwt.sign(user ,process.env.ACCESS_TOKEN_SECRET)
-                
                     res.cookie("token",accessToken,{
                         httpOnly:true
                     })
@@ -86,20 +85,7 @@ const login=(req,res)=>{
 }
 //jwt middleware 
 
-function authenticatToken(req,res,next){
-    const token=req.cookies.token
-    console.log(token)
-  
-    if(token == null) res.sendStatus(401)
-    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>
-    {
-        if(err) 
-        console.log('error verifying token')
-        req.user=user
-        next()
-  
-    })
-  }
+
 
 
 const createProducts=(req,res)=>{
@@ -144,19 +130,6 @@ const createUser=(req,res)=>{
     })  
  }
 
-
-
-// const updateUser=(req,res)=>{
-//     const id =req.params.id
-//     const {user_id,name,age}=req.body
-//     pool.query('UPDATE users SET user_id=$1,name=$2,age=$3 where user_id=$1',[id,name,age],(err,results)=>{
-//         if(err){
-//             throw err
-//         }
-//         res.status(200).send(`user with id : ${id} is modified `)
-//     })
-// }
-
 const updateProducts=(req,res)=>{
     const id =req.params.id
     const {name,price,description,instock}=req.body
@@ -178,18 +151,6 @@ const deleteProduct=(req,res)=>{
     })
 }
 
-// const getUsersByName=(req,res)=>{
-  
-
-//     const keyword=req.params.email
-//     pool.query("select * from users where email like $1 ",[`%${keyword}%`],(err,results)=>{
-//         if(err){
-//             throw err
-//         }
-//         res.status(200).send(results.rows)
-//     })
-// }
-
   module.exports = {
     getProducts,
     createUser,  
@@ -197,6 +158,5 @@ const deleteProduct=(req,res)=>{
     deleteProduct,
     getProductsByName,
     login,
-    authenticatToken,
     createProducts
   }

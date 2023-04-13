@@ -26,7 +26,7 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-app.get('/products',database.getProducts)
+app.get('/products',authenticatToken,database.getProducts)
 app.delete('/products/:id',database.deleteProduct)
 app.get('/products/:name',database.getProductsByName)
 app.post('/user',database.createUser)
@@ -34,9 +34,23 @@ app.post('/products',database.createProducts)
 app.put('/products/:id',database.updateProducts)
 app.post('/login',database.login)
 
-// app.post('/register')
-// app.post('/logout')
 
 
 
+
+function authenticatToken(req,res,next){
+  const token=req.cookies.token
+  console.log('im called ')
+  console.log(token)
+  try{
+      const user =jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+      req.user=user;
+      next()
+  }catch (err){
+      console.log(err)
+      res.clearCookie("token")
+      return res.redirect("/login")
+  }
+
+}
 
